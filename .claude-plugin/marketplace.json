@@ -1,0 +1,7 @@
+{
+  "name": "kinetic-reels",
+  "owner": { "name": "Shadab Shams" },
+  "plugins": [
+    { "name": "kinetic-reels", "source": "./", "description": "Make a finished vertical reel (voiceover, kinetic captions, real screenshots, music) from one topic." }
+  ]
+}

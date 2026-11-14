@@ -1,0 +1,8 @@
+{
+  "name": "kinetic-reels-engine",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Engine for the kinetic-reels agent skill: HTML reel pages rendered frame by frame with Playwright + ffmpeg.",
+  "license": "MIT",
+  "dependencies": { "playwright": "^1.58.2" }
+}

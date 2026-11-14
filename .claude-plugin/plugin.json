@@ -1,0 +1,7 @@
+{
+  "name": "kinetic-reels",
+  "version": "1.0.0",
+  "description": "Make a finished vertical reel (voiceover, kinetic captions, real screenshots, music) from one topic.",
+  "author": { "name": "Shadab Shams" },
+  "license": "MIT"
+}

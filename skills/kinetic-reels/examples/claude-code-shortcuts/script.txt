@@ -1,0 +1,42 @@
+// The gold reel's captions in script.txt form. captions.py turns this + audio/segs.json into CAPS (then hand-tune the anchors if needed).
+#/b:*7 Claude Code|Seven Claude Code
+m:shortcuts|shortcuts
+/m:almost *nobody|almost nobody
+m:uses.|uses.
+/s:And number seven|And number seven
+p:saves me hours.|saves me hours.
+#/s:One.|One.
+b:*/init|Slash init.
+/s:Claude reads your repo|Claude reads your repo
+m:and writes its own|and writes its own
+m:*CLAUDE.md file.|Claude dot M-D file.
+#/s:Two.|Two.
+b:The *@ sign.|The at sign.
+/m:Type @,|Type at,
+s:then a file name,|then a file name,
+/s:and that file drops|and that file drops
+m:straight into *context.|straight into context.
+#/s:Three.|Three.
+m:*Exclamation mark.|Exclamation mark.
+/m:Run any *terminal command|Run any terminal command
+s:right inside the chat.|right inside the chat.
+#/s:Four.|Four.
+b:*Shift + Tab.|Shift Tab.
+/m:That's *plan mode.|That's plan mode.
+/s:Claude plans first,|Claude plans first,
+p:and touches nothing.|and touches nothing.
+#/s:Five.|Five.
+b:*Escape.|Escape.
+/m:It *stops Claude|It stops Claude
+s:the second it goes|the second it goes
+s:the wrong way.|the wrong way.
+#/s:Six.|Six.
+b:*/compact.|Slash compact.
+/m:It shrinks a *long chat,|It shrinks a long chat,
+s:so you keep going.|so you keep going.
+#/s:And seven.|And seven.
+b:Type *claude -c.|Type claude, dash C.
+/m:It reopens your *last chat,|It reopens your last chat,
+s:exactly where you left it.|exactly where you left it.
+#/b:*Save this|Save this
+s:before your next session.|before your next session.

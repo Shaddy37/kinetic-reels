@@ -1,0 +1,8 @@
+{"voice": "Puck", "models": ["gemini-3.8-flash-tts", "gemini-3.8-flash-lite-tts"],
+ "parts": [
+  {"style": "Young builder making a fast tech reel, straight into a phone mic. Leaning in close, punchy, a little smug like he's about to share a secret. Neutral international English.",
+   "text": "TODO hook line with the payoff first. <short pause> TODO a second line that opens a loop."},
+  {"style": "Brisk explainer with a vocal smile, quick and bouncy, no dead air. Each point lands short, then the detail rolls out fast. Neutral international English.",
+   "text": "TODO the body. One idea per sentence. Numbers written as words, like eighty-five thousand."},
+  {"style": "Warm, direct sign-off with a grin, a touch slower. Neutral international English.",
+   "text": "TODO a CTA written for this reel only."}]}
