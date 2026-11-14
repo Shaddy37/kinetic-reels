@@ -4,11 +4,13 @@
 
 It runs inside the coding agent you already use: **Claude Code, Codex, OpenCode or Antigravity**.
 
+**Tested on a clean machine:** every change to the skill installs it from scratch on GitHub's Ubuntu runner, renders the example reel and checks the result. [See the last run](docs/TESTED.md).
+
 <p align="center"><img src="docs/demo.gif" width="300" alt="The first 9 seconds of the example reel: seven keycaps fall in, the seventh one is locked, captions appear word by word"></p>
 
 That reel ([full MP4, 39 s](docs/example.mp4)) came out of this skill. The same files are in `skills/kinetic-reels/examples/claude-code-shortcuts`, so you can render it yourself and check you get the same video.
 
-![Four frames from the example reel](docs/frames.png)
+![Five frames from the example reel](docs/frames.png)
 
 ## What it does, in plain words
 

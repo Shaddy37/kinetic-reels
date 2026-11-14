@@ -1,0 +1,65 @@
+name: test
+# Installs the skill from scratch on a clean machine (exactly what a user runs), checks the template with the layout judge,
+# renders the gold example reel and runs the final check. The result is written to docs/TESTED.md.
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['skills/**', '.github/workflows/test.yml']
+permissions:
+  contents: write
+jobs:
+  render-example:
+    runs-on: ubuntu-latest
+    env:
+      GEMINI_API_KEY: ci-placeholder-not-a-real-key
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
+      - name: Tidy the repo (one-time files)
+        run: |
+          git rm -rq --ignore-unmatch --cached bootstrap || true
+          find . -name __pycache__ -type d -prune -exec git rm -rq --cached --ignore-unmatch {} \; || true
+          rm -rf bootstrap; find . -name __pycache__ -type d -prune -exec rm -rf {} \;
+      - name: ffmpeg + emoji font
+        run: sudo apt-get update -q && sudo apt-get install -y -q ffmpeg fonts-noto-color-emoji
+      - name: Setup (what users run)
+        working-directory: skills/kinetic-reels
+        run: |
+          npm install --no-audit --no-fund
+          npx playwright install --with-deps chromium
+          python -m pip install -q -r requirements.txt
+      - name: Doctor
+        run: |
+          set -o pipefail
+          node skills/kinetic-reels/scripts/doctor.mjs 2>&1 | tee /tmp/1-doctor.txt
+      - name: New reel from the template + layout judge
+        run: |
+          set -o pipefail
+          mkdir -p /tmp/proj && cd /tmp/proj
+          node "$GITHUB_WORKSPACE/skills/kinetic-reels/scripts/new-reel.mjs" smoke-test 2>&1 | tee /tmp/2-new.txt
+          node "$GITHUB_WORKSPACE/skills/kinetic-reels/engine/shot.cjs" reels/smoke-test audit 2>&1 | tee /tmp/3-template-audit.txt
+      - name: Render the gold example
+        working-directory: skills/kinetic-reels/examples/claude-code-shortcuts
+        run: |
+          set -o pipefail
+          python ../../scripts/tighten.py . 2>&1 | tee /tmp/4-example.txt
+          node ../../engine/shot.cjs . audit 2>&1 | tee -a /tmp/4-example.txt
+          python mix.py 2>&1 | tee -a /tmp/4-example.txt
+          node ../../engine/render.cjs . 2>&1 | tail -1 | tee -a /tmp/4-example.txt
+          python ../../scripts/finish.py . 2>&1 | tee -a /tmp/4-example.txt
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with: { name: example-final-mp4, path: skills/kinetic-reels/examples/claude-code-shortcuts/out/final.mp4, if-no-files-found: ignore }
+      - name: Write docs/TESTED.md
+        if: always()
+        run: |
+          { echo "# Last test run"; echo; echo "$(date -u +'%Y-%m-%d %H:%M') UTC on a clean GitHub \`ubuntu-latest\` machine, result: **${{ job.status }}**"; echo;
+            echo "Steps: install the skill from scratch, run the doctor, make a new reel from the template and run the layout judge, render the example reel, run the final check."; echo;
+            echo '```'; cat /tmp/1-doctor.txt /tmp/2-new.txt /tmp/3-template-audit.txt /tmp/4-example.txt 2>/dev/null; echo '```'; } > docs/TESTED.md
+          git config user.name kinetic-reels-bot; git config user.email kinetic-reels-bot@users.noreply.github.com
+          git add -A docs/TESTED.md; git commit -qm "test: ${{ job.status }} on a clean machine" || true
+          git pull -q --rebase origin main || true; git push origin HEAD:main
