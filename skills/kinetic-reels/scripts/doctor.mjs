@@ -1,7 +1,9 @@
 // Checks everything the skill needs and says exactly what to fix: node doctor.mjs
 import { spawnSync } from 'node:child_process'; import fs from 'node:fs'; import path from 'node:path'; import { fileURLToPath } from 'node:url'; import { createRequire } from 'node:module';
 const SKILL = path.join(path.dirname(fileURLToPath(import.meta.url)), '..'); const win = process.platform === 'win32';
-const ok = (c, a) => { const r = spawnSync(c, a, { encoding: 'utf8', shell: win }); return r.status === 0 ? ((r.stdout || r.stderr || '').split('\n')[0].trim() || 'ok') : null; };
+// On Windows we go through the shell (so npm/py/.cmd files resolve), and the shell splits on spaces: quote those args.
+const q = a => win ? a.map(x => /[\s,]/.test(x) ? '"' + x + '"' : x) : a;
+const ok = (c, a) => { const r = spawnSync(c, q(a), { encoding: 'utf8', shell: win }); return r.status === 0 ? ((r.stdout || r.stderr || '').split('\n')[0].trim() || 'ok') : null; };
 let bad = 0; const pass = m => console.log('PASS ' + m); const fix = m => { bad++; console.log('FIX  ' + m); };
 const nv = +process.versions.node.split('.')[0]; nv >= 18 ? pass('Node.js ' + process.versions.node) : fix('Node.js 18+ needed (you have ' + process.versions.node + '): https://nodejs.org');
 const ff = ok('ffmpeg', ['-version']); ff ? pass(ff.slice(0, 40)) : fix('ffmpeg missing. Mac: brew install ffmpeg | Windows: winget install Gyan.FFmpeg | Linux: sudo apt install ffmpeg. Then open a new terminal.');
