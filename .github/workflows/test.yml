@@ -130,8 +130,51 @@ jobs:
         if: always()
         with: { name: log-real-voice, path: ci-logs/ }
 
+  demo-no-key:
+    runs-on: ubuntu-latest
+    env:
+      GEMINI_API_KEY: ''
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
+      - name: Setup (what users run)
+        working-directory: skills/kinetic-reels
+        run: |
+          sudo apt-get update -q && sudo apt-get install -y -q ffmpeg fonts-noto-color-emoji
+          npm install --no-audit --no-fund && npx playwright install --with-deps chromium
+          python -m pip install -q -r requirements.txt
+      - name: 20 s demo reel with NO API key (free local voice), only this repo
+        run: |
+          set -o pipefail
+          mkdir -p ci-logs/reels ci-proj && cd ci-proj
+          S=../skills/kinetic-reels; R=reels/git-undo; L=../ci-logs/5-demo.txt
+          cp $S/examples/claude-code-shortcuts/as/face.png me.png
+          echo '{"handle":"@shadabdoai","name":"Shadab Shams","face":"me.png","corner_logo":"git"}' > kinetic.config.json
+          node $S/scripts/new-reel.mjs git-undo 2>&1 | tee $L
+          cp $S/examples/git-undo/{reel.js,script.txt,tts.json,facts.md} $R/
+          python $S/scripts/voice.py $R 2>&1 | tee -a $L
+          python $S/scripts/tighten.py $R 2>&1 | tee -a $L
+          python $S/scripts/captions.py $R --write 2>&1 | tee -a $L
+          node $S/engine/shot.cjs $R audit 2>&1 | tee -a $L
+          python $R/mix.py 2>&1 | tee -a $L
+          node $S/engine/render.cjs $R 2>&1 | tail -1 | tee -a $L
+          python $S/scripts/finish.py $R 2>&1 | tee -a $L
+          node $S/engine/shot.cjs $R cover 0.6 2>&1 | tee -a $L
+          cp $R/out/final.mp4 ../ci-logs/reels/git-undo-demo.mp4
+          cp $R/out/cover.jpg ../ci-logs/reels/git-undo-demo-cover.jpg
+          ffmpeg -y -loglevel error -t 8 -i $R/out/final.mp4 -vf "fps=12,scale=360:-1:flags=lanczos,split[a][b];[a]palettegen=max_colors=96[p];[b][p]paletteuse=dither=bayer" ../ci-logs/reels/git-undo-demo.gif
+      - name: Result
+        if: always()
+        run: echo "${{ job.status }}" > ci-logs/status.txt
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with: { name: log-demo, path: ci-logs/ }
+
   report:
-    needs: [clean-machine, real-voice]
+    needs: [clean-machine, real-voice, demo-no-key]
     if: always()
     runs-on: ubuntu-latest
     steps:
@@ -147,15 +190,17 @@ jobs:
             echo "Each machine installs the skill from scratch, runs the doctor, builds a new reel from the template with the scene kit (stand-in voice, captions --write, layout judge, automatic sound, render, final check) and renders the gold example reel."; echo
             echo "| machine | result |"; echo "|---|---|"
             for os in ubuntu-latest macos-latest windows-latest; do echo "| $os | **$(st log-$os)** |"; done
-            echo "| real Gemini voice (ubuntu) | **$(st log-real-voice)** |"; echo
-            for os in ubuntu-latest macos-latest windows-latest real-voice; do
+            echo "| real Gemini voice (ubuntu) | **$(st log-real-voice)** |"
+            echo "| 20 s demo reel, no API key, free local voice (ubuntu) | **$(st log-demo)** |"; echo
+            for os in ubuntu-latest macos-latest windows-latest real-voice demo; do
               d="logs/log-$os"; [ -d "$d" ] || continue
               echo "<details><summary>$os log</summary>"; echo; echo '```'
-              cat "$d"/0-ffmpeg.txt "$d"/1-doctor.txt "$d"/2-template.txt "$d"/3-example.txt "$d"/4-voice.txt 2>/dev/null | grep -v 'GEMINI_API_KEY=' | tail -n 80
+              cat "$d"/0-ffmpeg.txt "$d"/1-doctor.txt "$d"/2-template.txt "$d"/3-example.txt "$d"/4-voice.txt "$d"/5-demo.txt 2>/dev/null | grep -v 'GEMINI_API_KEY=' | tail -n 80
               echo '```'; echo "</details>"; echo
             done
           } > docs/TESTED.md
-          if [ -f logs/log-real-voice/reels/how-it-works.mp4 ] && [ "$(st log-real-voice)" = "success" ]; then mkdir -p docs/reels && cp logs/log-real-voice/reels/* docs/reels/ && git add docs/reels; fi
+          for j in real-voice demo; do if [ -d logs/log-$j/reels ] && [ "$(st log-$j)" = "success" ]; then mkdir -p docs/reels && cp logs/log-$j/reels/* docs/reels/ && git add docs/reels; fi; done
+          [ -f docs/reels/git-undo-demo.mp4 ] && echo "Demo reel made on this run with no API key: [docs/reels/git-undo-demo.mp4](reels/git-undo-demo.mp4)" >> docs/TESTED.md
           cat docs/TESTED.md | head -20
           git config user.name kinetic-reels-bot; git config user.email kinetic-reels-bot@users.noreply.github.com
           git add docs/TESTED.md; git commit -qm "test: clean machines (ubuntu, macos, windows) + real voice" || true
