@@ -1,0 +1,22 @@
+name: bootstrap
+on:
+  push:
+    branches: [main]
+    paths: ['bootstrap/patch.json']
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Apply patch
+        run: |
+          set -e
+          python3 bootstrap/patch.py
+          git rm -rq bootstrap
+          git config user.name kinetic-reels-bot; git config user.email kinetic-reels-bot@users.noreply.github.com
+          git add -A; git reset -q .github || true
+          git commit -qm "Free local voice when there is no API key (Piper) + reference reel 3: 20 s git demo"
+          git push origin HEAD:main
+          echo PATCHED
