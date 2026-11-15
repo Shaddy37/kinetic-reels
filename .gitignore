@@ -1,6 +1,6 @@
 .env
 node_modules/
-reels/
+/reels/
 **/out/silent.mp4
 **/prev/
 __pycache__/
