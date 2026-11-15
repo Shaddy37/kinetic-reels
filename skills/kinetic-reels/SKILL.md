@@ -24,7 +24,7 @@ In Claude Code the skill switches to Opus 5.5 by itself (the `model` line above)
 ## Before the first reel (once)
 
 1. `node "SKILL/scripts/doctor.mjs"`. If it prints FIX lines, run `node "SKILL/scripts/setup.mjs"`, then do what the remaining FIX lines say. Don't go on until it prints ALL GOOD.
-2. The user needs a Gemini API key in `.env` (`GEMINI_API_KEY=...`, free from https://aistudio.google.com/apikey). Never print the key, never commit `.env`.
+2. The voice: a Gemini API key in `.env` (`GEMINI_API_KEY=...`, free from https://aistudio.google.com/apikey) gives the Puck voice. Never print the key, never commit `.env`. No key yet: `voice.py` falls back to a free local voice (Piper, `scripts/voice_local.py`). Fine for a test, tell the user the Gemini voice sounds better for posting.
 3. `kinetic.config.json` holds their handle (the watermark), name and a square photo for the end card. `new-reel.mjs` creates it the first time; ask the user for the three values and fill it in.
 
 ## Make a reel (every step, in order)

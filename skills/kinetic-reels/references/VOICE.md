@@ -25,4 +25,6 @@ If you see HTTP 429, you hit the limit for now: wait, or turn on billing in AI S
 ## After the take
 `tighten.py` cuts every pause to 0.34 s (keeps 0.30 s before the CTA) at normal speed. For a rushed meme feel: `--gap 0.18 --tempo 1.06`.
 Always check the take: TTS sometimes skips a line or says a name wrong. Fix the text, make it again.
-No key at all? AI Studio > Generate speech makes the same voice by hand: download the WAV as `reels/<slug>/audio/vo_raw.wav`.
+No key at all? Two ways:
+- `voice.py` runs `voice_local.py` by itself: a free local voice (Piper, offline after a one-time download of about 115 MB). Same tts.json, the styles and tags are skipped, one sentence at a time with a short pause between. Pick another voice with `--voice en_US-lessac-high` (list: huggingface.co/rhasspy/piper-voices). Force it even with a key: `voice.py <reel> --local`.
+- AI Studio > Generate speech makes the Puck voice by hand: download the WAV as `reels/<slug>/audio/vo_raw.wav`.

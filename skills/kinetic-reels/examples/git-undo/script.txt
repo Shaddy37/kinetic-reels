@@ -1,0 +1,20 @@
+// Demo reel: 3 git commands that undo mistakes (about 20 s). Spoken part after | matches tts.json word for word.
+#/b:Broke your *code?|Broke your code?
+/m:3 git commands|Three git commands
+s:undo almost *anything.|undo almost anything.
+/s:And number three|And number three
+p:feels like magic.|feels like magic.
+#/s:One.|One.
+b:git *restore|Git restore.
+/m:Throws away the changes|It throws away the changes
+s:you didn't want.|you didn't want.
+#/s:Two.|Two.
+b:commit *--amend|Git commit amend.
+/m:Fixes your last commit|It fixes your last commit
+s:before anyone sees it.|before anyone sees it.
+#/s:Three.|Three.
+b:git *reflog|Git reflog.
+/m:Finds the commit|It finds the commit
+s:you thought you lost.|you thought you lost.
+#/b:*Save this|Save this
+s:for your next bad day.|for your next bad day.

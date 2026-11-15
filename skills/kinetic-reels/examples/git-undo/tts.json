@@ -1,0 +1,8 @@
+{"voice": "Puck", "models": ["gemini-3.8-flash-tts", "gemini-3.8-flash-lite-tts"],
+ "parts": [
+  {"style": "Young builder making a fast tech reel, straight into a phone mic. Leaning in close, punchy, a little smug like he's about to share a secret. Neutral international English.",
+   "text": "Broke your code? <short pause> Three git commands undo almost anything. And number three feels like magic."},
+  {"style": "Brisk list with a vocal smile, quick and bouncy, no dead air. Each number lands short, then the detail rolls out fast. Neutral international English.",
+   "text": "One. Git restore. It throws away the changes you didn't want. Two. Git commit amend. It fixes your last commit before anyone sees it. Three. Git reflog. It finds the commit you thought you lost."},
+  {"style": "Warm, direct sign-off with a grin, a touch slower. Neutral international English.",
+   "text": "Save this for your next bad day."}]}

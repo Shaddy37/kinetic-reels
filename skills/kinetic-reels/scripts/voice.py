@@ -1,5 +1,5 @@
 """Make the voiceover with Gemini TTS (Google AI Studio API key in .env as GEMINI_API_KEY).
-Usage: python voice.py <reel folder>
+Usage: python voice.py <reel folder> [--local]   (no key, or --local: the free local voice, scripts/voice_local.py)
 Reads <reel>/tts.json:
   {"voice": "Puck", "models": ["gemini-3.8-flash-tts", "gemini-3.8-flash-lite-tts"],
    "parts": [{"style": "how this part sounds", "text": "the exact words, read word for word"}, ...]}
@@ -14,7 +14,9 @@ def wav_from_pcm(pcm, sr=24000):
 def main():
     reel = os.path.abspath(sys.argv[1] if len(sys.argv) > 1 else '.')
     envf = load_env(); key = os.environ.get('GEMINI_API_KEY', '').strip()
-    if not key: print('NO KEY: put GEMINI_API_KEY=your-key in a .env file (get one free at https://aistudio.google.com/apikey)'); sys.exit(2)
+    if not key or '--local' in sys.argv:
+        if not key: print('NO KEY: using the free local voice (Piper). For the Gemini voice put GEMINI_API_KEY=your-key in .env (free at https://aistudio.google.com/apikey)')
+        import subprocess; sys.exit(subprocess.run([sys.executable, os.path.join(os.path.dirname(os.path.abspath(__file__)), 'voice_local.py'), reel] + [x for x in sys.argv[2:] if x != '--local']).returncode)
     job = json.load(open(os.path.join(reel, 'tts.json'), encoding='utf-8'))
     content = [{'type': 'text', 'text': p['text'], 'annotations': [{'type': 'speech_metadata', 'style': p['style']}]} for p in job['parts']]
     os.makedirs(os.path.join(reel, 'audio'), exist_ok=True); out = os.path.join(reel, 'audio', 'vo_raw.wav')

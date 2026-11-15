@@ -20,7 +20,7 @@ fonts.length ? fix('fonts missing in assets/fonts: ' + fonts.join(', ') + ' (re-
 fs.existsSync(path.join(SKILL, 'assets', 'music', 'chill-beat-cc0.mp3')) ? pass('free CC0 music bed') : fix('assets/music/chill-beat-cc0.mp3 missing (re-install the skill)');
 let key = process.env.GEMINI_API_KEY; let where = 'environment';
 if (!key) { let d = process.cwd(); for (let i = 0; i < 8 && !key; i++) { const f = path.join(d, '.env'); if (fs.existsSync(f)) { const m = fs.readFileSync(f, 'utf8').match(/^\s*GEMINI_API_KEY\s*=\s*["']?([^"'\r\n]+)/m); if (m) { key = m[1]; where = f; } } const nd = path.dirname(d); if (nd === d) break; d = nd; } }
-key ? pass('GEMINI_API_KEY found (' + where + ')') : fix('GEMINI_API_KEY not found. Get a free key at https://aistudio.google.com/apikey and add a line GEMINI_API_KEY=... to a .env file in your project folder.');
+key ? pass('GEMINI_API_KEY found (' + where + ')') : console.log('NOTE no GEMINI_API_KEY: voice.py will use the free local voice (Piper). For the Gemini Puck voice get a free key at https://aistudio.google.com/apikey and add GEMINI_API_KEY=... to a .env file here.');
 const cfg = path.join(process.cwd(), 'kinetic.config.json'); fs.existsSync(cfg) ? pass('kinetic.config.json (your handle + photo)') : console.log('NOTE kinetic.config.json not found here yet: new-reel.mjs makes one the first time.');
 console.log(bad ? `\n${bad} thing(s) to fix, then run this again.` : '\nALL GOOD. Make your first reel.');
 process.exitCode = bad ? 1 : 0;

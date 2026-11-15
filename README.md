@@ -18,6 +18,7 @@ That reel ([full MP4, 39 s](docs/example.mp4)) came out of this skill. The same 
 
 1. **7 Claude Code shortcuts almost nobody uses** (39 s): [MP4](docs/example.mp4). Files: `skills/kinetic-reels/examples/claude-code-shortcuts`.
 2. **How the skill works, in 5 steps** (a new topic, built from the scene kit only): files in `skills/kinetic-reels/examples/how-it-works`. The repo's voice test records it with a real Gemini voice and saves it as `docs/reels/how-it-works.mp4`.
+3. **3 git commands that undo mistakes** (about 20 s, made with **no API key**): [MP4](docs/reels/git-undo-demo.mp4). The test machine makes it from this repo alone on every change, with the free local voice. Files: `skills/kinetic-reels/examples/git-undo`.
 
 The full setup guide with pictures: [docs/guide](docs/guide).
 
@@ -70,6 +71,8 @@ It installs the renderer (Playwright + Chromium) and two Python packages, then r
 3. Never commit that file. The `.gitignore` here already ignores it.
 
 Google gives a free tier with daily limits that differ per project. One reel is one voice request. If you ever pass the limit, a 45-second voiceover costs about one cent.
+
+**No key yet?** It still works. Without a key, `voice.py` uses a free local voice (Piper, runs on your computer, one-time download of about 115 MB). It's plainer than Gemini's Puck, so use it to test the whole pipeline, then add the key for reels you post. Reference reel 3 is made exactly this way.
 
 ## Your first reel
 
