@@ -11,7 +11,7 @@ You make a reel the way a motion designer would, but in code: one HTML page draw
 renders it frame by frame at 30 fps, ffmpeg adds the voice and the music. Same input, same video, every time.
 
 `SKILL` below means the folder this file is in. Run every command from the user's project folder (where `reels/` and `.env` live).
-Use `python3` on Mac/Linux and `python` on Windows.
+Use the python command the doctor prints on its last line (`PYTHON use ...`). Usually `python3` on Mac/Linux and `python` or `py` on Windows.
 
 ## Model check (every time, before anything else)
 

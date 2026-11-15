@@ -5,7 +5,8 @@ const SKILL = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
 const win = process.platform === 'win32'; const run = (c, a, o = {}) => { console.log('> ' + [c, ...a].join(' ')); return spawnSync(c, a, { stdio: 'inherit', cwd: SKILL, shell: win, ...o }).status === 0; };
 if (!run('npm', ['install', '--no-audit', '--no-fund'])) { console.log('FIX: npm install failed. Is Node.js 18 or newer installed? https://nodejs.org'); process.exit(1); }
 if (!run('npx', ['playwright', 'install', 'chromium'])) console.log('FIX: Chromium download failed. Run it again, or set CHROME_PATH to your Chrome.');
-const py = ['python3', 'python', 'py'].find(p => spawnSync(p, ['--version'], { shell: win }).status === 0);
+const pv = p => { const r = spawnSync(p, ['--version'], { encoding: 'utf8', shell: win }); return r.status === 0 && /Python 3\./.test((r.stdout || '') + (r.stderr || '')); };
+const py = (win ? ['python', 'py', 'python3'] : ['python3', 'python']).find(pv);
 if (!py) console.log('FIX: Python 3 not found. Install it from https://www.python.org/downloads/ (tick "Add to PATH" on Windows).');
 else if (!run(py, ['-m', 'pip', 'install', '-r', 'requirements.txt'])) run(py, ['-m', 'pip', 'install', '--user', '-r', 'requirements.txt']);
 run('node', [path.join('scripts', 'doctor.mjs')]);

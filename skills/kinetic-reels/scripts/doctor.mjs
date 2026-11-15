@@ -6,9 +6,11 @@ let bad = 0; const pass = m => console.log('PASS ' + m); const fix = m => { bad+
 const nv = +process.versions.node.split('.')[0]; nv >= 18 ? pass('Node.js ' + process.versions.node) : fix('Node.js 18+ needed (you have ' + process.versions.node + '): https://nodejs.org');
 const ff = ok('ffmpeg', ['-version']); ff ? pass(ff.slice(0, 40)) : fix('ffmpeg missing. Mac: brew install ffmpeg | Windows: winget install Gyan.FFmpeg | Linux: sudo apt install ffmpeg. Then open a new terminal.');
 ok('ffprobe', ['-version']) ? pass('ffprobe') : fix('ffprobe missing (it comes with ffmpeg)');
-const py = ['python3', 'python', 'py'].find(p => ok(p, ['--version']));
-if (!py) fix('Python 3 missing: https://www.python.org/downloads/');
-else { pass(ok(py, ['--version'])); ok(py, ['-c', 'import numpy, scipy']) ? pass('numpy + scipy') : fix(`numpy/scipy missing: ${py} -m pip install -r "${path.join(SKILL, 'requirements.txt')}"`); }
+// Windows often has several Pythons (Store alias, py launcher, python.org). Use the first one that already has numpy + scipy.
+const pys = (win ? ['python', 'py', 'python3'] : ['python3', 'python']).filter(p => { const v = ok(p, ['--version']); return v && /Python 3\./.test(v); });
+const py = pys.find(p => ok(p, ['-c', 'import numpy, scipy'])) || pys[0];
+if (!py) fix('Python 3 missing: https://www.python.org/downloads/ (on Windows tick "Add python.exe to PATH")');
+else { pass(ok(py, ['--version']) + ' (command: ' + py + ')'); ok(py, ['-c', 'import numpy, scipy']) ? pass('numpy + scipy') : fix(`numpy/scipy missing: ${py} -m pip install -r "${path.join(SKILL, 'requirements.txt')}"`); }
 let pw = null; try { pw = createRequire(path.join(SKILL, 'package.json'))('playwright'); pass('Playwright ' + createRequire(path.join(SKILL, 'package.json'))('playwright/package.json').version); } catch { fix(`Playwright missing: node "${path.join(SKILL, 'scripts', 'setup.mjs')}"`); }
 if (pw) { try { const b = await pw.chromium.launch({ executablePath: process.env.CHROME_PATH || undefined }); await b.close(); pass('Chromium starts'); } catch (e) { fix('Chromium will not start: npx playwright install chromium (inside ' + SKILL + '), or set CHROME_PATH. ' + String(e.message).split('\n')[0]); } }
 const fonts = ['Inter.ttf', 'InterTight.ttf', 'JetBrainsMono.ttf', 'DMSerifDisplay-Italic.ttf'].filter(f => !fs.existsSync(path.join(SKILL, 'assets', 'fonts', f)));
@@ -20,3 +22,4 @@ key ? pass('GEMINI_API_KEY found (' + where + ')') : fix('GEMINI_API_KEY not fou
 const cfg = path.join(process.cwd(), 'kinetic.config.json'); fs.existsSync(cfg) ? pass('kinetic.config.json (your handle + photo)') : console.log('NOTE kinetic.config.json not found here yet: new-reel.mjs makes one the first time.');
 console.log(bad ? `\n${bad} thing(s) to fix, then run this again.` : '\nALL GOOD. Make your first reel.');
 process.exitCode = bad ? 1 : 0;
+if (py) console.log('PYTHON use `' + py + '` for every python command in this skill.');
