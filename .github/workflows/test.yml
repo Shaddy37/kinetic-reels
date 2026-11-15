@@ -1,31 +1,39 @@
 name: test
-# Installs the skill from scratch on a clean machine (exactly what a user runs), checks the template with the layout judge,
-# renders the gold example reel and runs the final check. The result is written to docs/TESTED.md.
+# Installs the skill from scratch on clean Ubuntu, macOS and Windows machines (exactly what a user runs), builds a new reel from the
+# template with the scene kit (stand-in voice, captions --write, layout judge, automatic sound, render, final check) and renders the gold
+# example. With a GEMINI_API_KEY repo secret it also records a REAL voice and renders a full reel from it. Results: docs/TESTED.md
 on:
   workflow_dispatch:
   push:
     branches: [main]
-    paths: ['skills/**', '.github/workflows/test.yml']
+    paths: ['skills/**', 'tests/**', '.github/workflows/test.yml']
 permissions:
   contents: write
 jobs:
-  render-example:
-    runs-on: ubuntu-latest
+  clean-machine:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run: { shell: bash }
     env:
       GEMINI_API_KEY: ci-placeholder-not-a-real-key
+      PYTHONUTF8: '1'
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with: { node-version: 22 }
       - uses: actions/setup-python@v5
         with: { python-version: '3.12' }
-      - name: Tidy the repo (one-time files)
+      - name: ffmpeg
         run: |
-          git rm -rq --ignore-unmatch --cached bootstrap || true
-          find . -name __pycache__ -type d -prune -exec git rm -rq --cached --ignore-unmatch {} \; || true
-          rm -rf bootstrap; find . -name __pycache__ -type d -prune -exec rm -rf {} \;
-      - name: ffmpeg + emoji font
-        run: sudo apt-get update -q && sudo apt-get install -y -q ffmpeg fonts-noto-color-emoji
+          mkdir -p ci-logs
+          if [ "$RUNNER_OS" = "Linux" ]; then sudo apt-get update -q && sudo apt-get install -y -q ffmpeg fonts-noto-color-emoji
+          elif [ "$RUNNER_OS" = "macOS" ]; then brew install ffmpeg
+          else choco install ffmpeg -y --no-progress; fi
+          ffmpeg -version | head -1 | tee ci-logs/0-ffmpeg.txt
       - name: Setup (what users run)
         working-directory: skills/kinetic-reels
         run: |
@@ -35,31 +43,120 @@ jobs:
       - name: Doctor
         run: |
           set -o pipefail
-          node skills/kinetic-reels/scripts/doctor.mjs 2>&1 | tee /tmp/1-doctor.txt
-      - name: New reel from the template + layout judge
+          node skills/kinetic-reels/scripts/doctor.mjs 2>&1 | tee ci-logs/1-doctor.txt
+      - name: New reel from the template, scene kit, full pipeline (stand-in voice)
         run: |
           set -o pipefail
-          mkdir -p /tmp/proj && cd /tmp/proj
-          node "$GITHUB_WORKSPACE/skills/kinetic-reels/scripts/new-reel.mjs" smoke-test 2>&1 | tee /tmp/2-new.txt
-          node "$GITHUB_WORKSPACE/skills/kinetic-reels/engine/shot.cjs" reels/smoke-test audit 2>&1 | tee /tmp/3-template-audit.txt
+          mkdir -p ci-proj && cd ci-proj
+          S=../skills/kinetic-reels; R=reels/kit-test; L=../ci-logs/2-template.txt
+          node $S/scripts/new-reel.mjs kit-test 2>&1 | tee $L
+          python ../tests/fake_voice.py $R 9 2>&1 | tee -a $L
+          python $S/scripts/tighten.py $R 2>&1 | tee -a $L
+          python $S/scripts/captions.py $R --write 2>&1 | tee -a $L
+          node $S/engine/shot.cjs $R audit 2>&1 | tee -a $L
+          python $R/mix.py 2>&1 | tee -a $L
+          node $S/engine/render.cjs $R 2>&1 | tail -1 | tee -a $L
+          python $S/scripts/finish.py $R 2>&1 | tee -a $L
       - name: Render the gold example
         working-directory: skills/kinetic-reels/examples/claude-code-shortcuts
         run: |
           set -o pipefail
-          python ../../scripts/tighten.py . 2>&1 | tee /tmp/4-example.txt
-          node ../../engine/shot.cjs . audit 2>&1 | tee -a /tmp/4-example.txt
-          python mix.py 2>&1 | tee -a /tmp/4-example.txt
-          node ../../engine/render.cjs . 2>&1 | tail -1 | tee -a /tmp/4-example.txt
-          python ../../scripts/finish.py . 2>&1 | tee -a /tmp/4-example.txt
+          L=../../../../ci-logs/3-example.txt
+          python ../../scripts/tighten.py . 2>&1 | tee $L
+          node ../../engine/shot.cjs . audit 2>&1 | tee -a $L
+          python mix.py 2>&1 | tee -a $L
+          node ../../engine/render.cjs . 2>&1 | tail -1 | tee -a $L
+          python ../../scripts/finish.py . 2>&1 | tee -a $L
+      - name: Result
+        if: always()
+        run: echo "${{ job.status }}" > ci-logs/status.txt
       - uses: actions/upload-artifact@v4
         if: always()
+        with: { name: 'log-${{ matrix.os }}', path: ci-logs/ }
+      - uses: actions/upload-artifact@v4
+        if: always() && matrix.os == 'ubuntu-latest'
         with: { name: example-final-mp4, path: skills/kinetic-reels/examples/claude-code-shortcuts/out/final.mp4, if-no-files-found: ignore }
-      - name: Write docs/TESTED.md
-        if: always()
+
+  real-voice:
+    runs-on: ubuntu-latest
+    env:
+      GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Key check
         run: |
-          { echo "# Last test run"; echo; echo "$(date -u +'%Y-%m-%d %H:%M') UTC on a clean GitHub \`ubuntu-latest\` machine, result: **${{ job.status }}**"; echo;
-            echo "Steps: install the skill from scratch, run the doctor, make a new reel from the template and run the layout judge, render the example reel, run the final check."; echo;
-            echo '```'; cat /tmp/1-doctor.txt /tmp/2-new.txt /tmp/3-template-audit.txt /tmp/4-example.txt 2>/dev/null; echo '```'; } > docs/TESTED.md
+          mkdir -p ci-logs
+          if [ -z "$GEMINI_API_KEY" ]; then echo "skipped: add a GEMINI_API_KEY repository secret to run the real voice test" > ci-logs/status.txt; else echo "running" > ci-logs/status.txt; fi
+          cat ci-logs/status.txt
+      - uses: actions/setup-node@v4
+        if: env.GEMINI_API_KEY != ''
+        with: { node-version: 22 }
+      - uses: actions/setup-python@v5
+        if: env.GEMINI_API_KEY != ''
+        with: { python-version: '3.12' }
+      - name: Setup
+        if: env.GEMINI_API_KEY != ''
+        working-directory: skills/kinetic-reels
+        run: |
+          sudo apt-get update -q && sudo apt-get install -y -q ffmpeg fonts-noto-color-emoji
+          npm install --no-audit --no-fund && npx playwright install --with-deps chromium
+          python -m pip install -q -r requirements.txt
+      - name: Real Gemini voice, then reference reel 2 (examples/how-it-works) from it
+        if: env.GEMINI_API_KEY != ''
+        run: |
+          set -o pipefail
+          mkdir -p ci-proj && cd ci-proj
+          S=../skills/kinetic-reels; R=reels/how-it-works; L=../ci-logs/4-voice.txt
+          cp $S/examples/claude-code-shortcuts/as/face.png me.png
+          echo '{"handle":"@shadabdoai","name":"Shadab Shams","face":"me.png","corner_logo":"claude"}' > kinetic.config.json
+          node $S/scripts/new-reel.mjs how-it-works 2>&1 | tee $L
+          cp $S/examples/how-it-works/{reel.js,script.txt,tts.json,facts.md} $R/
+          python $S/scripts/voice.py $R 2>&1 | tee -a $L
+          python $S/scripts/tighten.py $R 2>&1 | tee -a $L
+          python $S/scripts/captions.py $R --write 2>&1 | tee -a $L
+          node $S/engine/shot.cjs $R audit 2>&1 | tee -a $L
+          python $R/mix.py 2>&1 | tee -a $L
+          node $S/engine/render.cjs $R 2>&1 | tail -1 | tee -a $L
+          python $S/scripts/finish.py $R 2>&1 | tee -a $L
+          node $S/engine/shot.cjs $R cover 0.6 2>&1 | tee -a $L
+          mkdir -p ../ci-logs/reels
+          cp $R/out/final.mp4 ../ci-logs/reels/how-it-works.mp4
+          cp $R/out/cover.jpg ../ci-logs/reels/how-it-works-cover.jpg
+          ffmpeg -y -loglevel error -t 9 -i $R/out/final.mp4 -vf "fps=12,scale=360:-1:flags=lanczos,split[a][b];[a]palettegen=max_colors=96[p];[b][p]paletteuse=dither=bayer" ../ci-logs/reels/how-it-works.gif
+      - name: Result
+        if: always() && env.GEMINI_API_KEY != ''
+        run: echo "${{ job.status }}" > ci-logs/status.txt
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with: { name: log-real-voice, path: ci-logs/ }
+
+  report:
+    needs: [clean-machine, real-voice]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with: { pattern: 'log-*', path: logs }
+      - name: Write docs/TESTED.md
+        run: |
+          st(){ cat "logs/$1/status.txt" 2>/dev/null || echo "did not run"; }
+          {
+            echo "# Last test run"; echo
+            echo "$(date -u +'%Y-%m-%d %H:%M') UTC, commit \`${GITHUB_SHA::7}\`, on clean GitHub machines."; echo
+            echo "Each machine installs the skill from scratch, runs the doctor, builds a new reel from the template with the scene kit (stand-in voice, captions --write, layout judge, automatic sound, render, final check) and renders the gold example reel."; echo
+            echo "| machine | result |"; echo "|---|---|"
+            for os in ubuntu-latest macos-latest windows-latest; do echo "| $os | **$(st log-$os)** |"; done
+            echo "| real Gemini voice (ubuntu) | **$(st log-real-voice)** |"; echo
+            for os in ubuntu-latest macos-latest windows-latest real-voice; do
+              d="logs/log-$os"; [ -d "$d" ] || continue
+              echo "<details><summary>$os log</summary>"; echo; echo '```'
+              cat "$d"/0-ffmpeg.txt "$d"/1-doctor.txt "$d"/2-template.txt "$d"/3-example.txt "$d"/4-voice.txt 2>/dev/null | grep -v 'GEMINI_API_KEY=' | tail -n 80
+              echo '```'; echo "</details>"; echo
+            done
+          } > docs/TESTED.md
+          if [ -f logs/log-real-voice/reels/how-it-works.mp4 ] && [ "$(st log-real-voice)" = "success" ]; then mkdir -p docs/reels && cp logs/log-real-voice/reels/* docs/reels/ && git add docs/reels; fi
+          cat docs/TESTED.md | head -20
           git config user.name kinetic-reels-bot; git config user.email kinetic-reels-bot@users.noreply.github.com
-          git add -A docs/TESTED.md; git commit -qm "test: ${{ job.status }} on a clean machine" || true
+          git add docs/TESTED.md; git commit -qm "test: clean machines (ubuntu, macos, windows) + real voice" || true
           git pull -q --rebase origin main || true; git push origin HEAD:main
