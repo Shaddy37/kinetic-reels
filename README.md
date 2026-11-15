@@ -4,13 +4,22 @@
 
 It runs inside the coding agent you already use: **Claude Code, Codex, OpenCode or Antigravity**.
 
-**Tested on a clean machine:** every change to the skill installs it from scratch on GitHub's Ubuntu runner, renders the example reel and checks the result. [See the last run](docs/TESTED.md).
+**Use it with Claude Opus 5.5.** That's the model it was built and tested with. In Claude Code the skill switches to Opus 5.5 at high effort by itself (Claude Code v2.1.280 or newer, run `claude update`). In OpenCode pick Claude Opus 5.5 in `/models`. Codex only runs OpenAI models, so the skill works there but the tested setup is Opus 5.5.
+
+**Tested on clean machines:** every change installs the skill from scratch on GitHub's **Ubuntu, macOS and Windows** machines, builds a new reel from the template with the scene kit, renders the example reel and checks both. With a Gemini key in the repo secrets it also records a real voice and renders a full reel from it. [See the last run](docs/TESTED.md).
 
 <p align="center"><img src="docs/demo.gif" width="300" alt="The first 9 seconds of the example reel: seven keycaps fall in, the seventh one is locked, captions appear word by word"></p>
 
 That reel ([full MP4, 39 s](docs/example.mp4)) came out of this skill. The same files are in `skills/kinetic-reels/examples/claude-code-shortcuts`, so you can render it yourself and check you get the same video.
 
-![Five frames from the example reel](docs/frames.png)
+![Four frames from the example reel](docs/frames.png)
+
+## Reference reels
+
+1. **7 Claude Code shortcuts almost nobody uses** (39 s): [MP4](docs/example.mp4). Files: `skills/kinetic-reels/examples/claude-code-shortcuts`.
+2. **How the skill works, in 5 steps** (a new topic, built from the scene kit only): files in `skills/kinetic-reels/examples/how-it-works`. The repo's voice test records it with a real Gemini voice and saves it as `docs/reels/how-it-works.mp4`.
+
+The full setup guide with pictures: [docs/guide](docs/guide).
 
 ## What it does, in plain words
 
@@ -26,7 +35,7 @@ The agent then:
 7. adds sound effects and a quiet CC0 music bed,
 8. renders 30 frames per second and hands you `final.mp4` plus a cover.
 
-No timeline editor. No templates you drag around. And no stock footage either.
+No timeline editor and no stock footage. And it isn't a template you fill in: the agent describes each scene as data (a key slam, a command typing, a real docs screenshot, a counter, a STOP sign...) and the **scene kit** moves it the way the example reel moves, frame for frame. Each picture is tied to the word it shows, so a new voice take re-times the whole reel with one command, and every picture change gets its sound by itself.
 
 ## Install
 
@@ -84,12 +93,12 @@ python ../../scripts/finish.py .
 ```
 skills/kinetic-reels/
   SKILL.md            the instructions your agent follows
-  references/         script + hook rules, voice tags, components, sound, assets, troubleshooting
-  engine/             the reel engine (core_a.js, core_b.js, motion.js) + render.cjs and the layout judge shot.cjs
-  template/           a working starter reel (reel.html, reel.js, tts.json, script.txt, mix.py)
+  references/         the scene kit (KIT.md), script + hook rules, voice tags, components, sound, assets, troubleshooting
+  engine/             the reel engine: kit.js (the scene kit), core_a.js, core_b.js, motion.js, render.cjs and the layout judge shot.cjs
+  template/           a working starter reel written with the scene kit (renders as is)
   scripts/            setup, doctor, new-reel, voice, tighten, captions, docshot, music, finish
   assets/             fonts (OFL), logos, one CC0 music track
-  examples/           the gold reel, with its voice take
+  examples/           the gold reel as a scene-kit spec (plus the hand-coded original), with its voice take
 ```
 
 ## Why it looks the way it does

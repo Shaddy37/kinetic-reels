@@ -3,6 +3,8 @@ Usage: python finish.py <reel folder>
 Needs <reel>/out/silent.mp4 (render.cjs) and <reel>/audio/mix.wav (the reel's mix.py). Writes <reel>/out/final.mp4,
 then checks: 1080x1920, 30 fps, 15 to 90 s, an audio track, loudness near -16 LUFS. Prints PASS or FIX lines."""
 import sys, os, re, json, subprocess
+try: sys.stdout.reconfigure(encoding='utf-8', errors='replace')  # Windows consoles default to cp1252
+except Exception: pass
 reel = os.path.abspath(sys.argv[1] if len(sys.argv) > 1 else '.')
 silent = os.path.join(reel, 'out', 'silent.mp4'); mix = os.path.join(reel, 'audio', 'mix.wav'); final = os.path.join(reel, 'out', 'final.mp4')
 for f in (silent, mix):

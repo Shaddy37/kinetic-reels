@@ -1,5 +1,7 @@
 # What you can put on screen
 
+Start with the scene kit (`references/KIT.md`): most reels need nothing on this page. Use these pieces inside `REEL.custom(t)` when you need a picture no beat covers.
+
 Helpers (core_a.js): `add(html, 'card'|'lab'|'prop')` puts a picture on stage (the kind makes the judge check it), `setT(el,{x,y,s,o,b,r})`
 (x,y = centre), `cardV(t,in,out,y)` rise in, `popV(t,in,out,x,y)` spring pop, `labV(t,in,out,x,y)` label fade, `K(t,keys)` keyframes,
 `typ(id,text,t,start,seconds)` typing, `prog`, `eo3`, `eo5`, `eio`, `spring`, `fmt(n)` (1,234), `hide(t,a,b)`.

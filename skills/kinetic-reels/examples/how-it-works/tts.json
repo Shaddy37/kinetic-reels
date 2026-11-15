@@ -1,0 +1,8 @@
+{"voice": "Puck", "models": ["gemini-3.8-flash-tts", "gemini-3.8-flash-lite-tts"],
+ "parts": [
+  {"style": "Young builder making a fast tech reel, straight into a phone mic. Leaning in close, punchy, a little smug like he's about to share a secret. Neutral international English.",
+   "text": "A coding agent made this reel. Five steps, zero editing. <short pause> And step five feels like cheating."},
+  {"style": "Brisk explainer with a vocal smile, quick and bouncy, no dead air. Each step lands short, then the detail rolls out fast. Neutral international English.",
+   "text": "One. Add the skill. One command. Claude Code, Codex or OpenCode. Two. Run the doctor. It checks everything and tells you what to fix. Three. Paste a free key. Gemini does the voice, about a cent past the free tier. Four. Type one sentence. It plans every scene before it builds. And five. It judges itself. Every zero point two seconds, nothing cut off, nothing overlapping."},
+  {"style": "Warm, direct sign-off with a grin, a touch slower. Neutral international English.",
+   "text": "Save this for your first reel."}]}

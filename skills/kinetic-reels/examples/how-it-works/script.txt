@@ -1,0 +1,29 @@
+// Reference reel 2: how the skill works, in 5 steps. Spoken part after | matches tts.json word for word.
+#/s:A coding agent|A coding agent
+b:*made this reel.|made this reel.
+/m:Five steps,|Five steps,
+s:zero editing.|zero editing.
+/s:And step five|And step five
+p:feels like cheating.|feels like cheating.
+#/s:One.|One.
+b:Add the *skill.|Add the skill.
+/m:One command.|One command.
+s:Claude Code, Codex or OpenCode.|Claude Code, Codex or OpenCode.
+#/s:Two.|Two.
+b:Run the *doctor.|Run the doctor.
+/m:It checks *everything|It checks everything
+s:and tells you what to fix.|and tells you what to fix.
+#/s:Three.|Three.
+b:Paste a *free key.|Paste a free key.
+/m:*Gemini does the voice,|Gemini does the voice,
+s:about a cent past the free tier.|about a cent past the free tier.
+#/s:Four.|Four.
+b:Type *one sentence.|Type one sentence.
+/m:It plans *every scene|It plans every scene
+s:before it builds.|before it builds.
+#/s:And five.|And five.
+b:It *judges itself.|It judges itself.
+/m:Every *0.2 seconds,|Every zero point two seconds,
+s:nothing cut off, nothing overlapping.|nothing cut off, nothing overlapping.
+#/b:*Save this|Save this
+s:for your first reel.|for your first reel.

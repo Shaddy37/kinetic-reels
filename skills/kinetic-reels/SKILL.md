@@ -1,6 +1,8 @@
 ---
 name: kinetic-reels
 description: Make a finished vertical reel (1080x1920 MP4, 38 to 60 s) for Instagram, TikTok, YouTube Shorts or LinkedIn from one topic. Kinetic word-by-word captions synced to an AI voiceover (Gemini TTS), real screenshots and logos as moving cards, sound effects and a free CC0 music bed. Use when the user asks for a reel, short, TikTok, faceless video, explainer video or "make a video about X".
+model: claude-opus-5-5
+effort: high
 ---
 
 # Kinetic reels
@@ -10,6 +12,14 @@ renders it frame by frame at 30 fps, ffmpeg adds the voice and the music. Same i
 
 `SKILL` below means the folder this file is in. Run every command from the user's project folder (where `reels/` and `.env` live).
 Use `python3` on Mac/Linux and `python` on Windows.
+
+## Model check (every time, before anything else)
+
+This skill is built and tested with **Claude Opus 5.5** at high effort. Smaller models skip beats, guess timings and invent assets.
+In Claude Code the skill switches to Opus 5.5 by itself (the `model` line above). If you are NOT Claude Opus 5.5, tell the user once, then follow their answer:
+- Claude Code: run `claude update` (v2.1.280 or newer), then `/model opus` and `/effort high`.
+- OpenCode: `/models`, pick Claude Opus 5.5 from the Anthropic provider.
+- Codex runs OpenAI models only. The skill still works there, but the tested setup is Claude Code or OpenCode with Opus 5.5.
 
 ## Before the first reel (once)
 
@@ -24,11 +34,11 @@ Use `python3` on Mac/Linux and `python` on Windows.
 3. **Start the folder:** `node "SKILL/scripts/new-reel.mjs" <slug> [--logo claude]`. The corner logo is the topic's own logo (files in `as/`; add the real SVG if it is missing).
 4. **Script.** Write `tts.json` (what the voice says, split into hook / body / payoff / CTA parts, each with its own style) and `script.txt` (the captions, same words, same order). Rules: `references/SCRIPT.md`. Tags and styles: `references/VOICE.md`.
 5. **Voice:** `python "SKILL/scripts/voice.py" reels/<slug>` then `python "SKILL/scripts/tighten.py" reels/<slug>` (pauses to 0.34 s, normal speed). Listen to the take, or check it with any transcriber: if a line is missing or a name is wrong, fix the text and run voice.py again.
-6. **Captions + timing:** `python "SKILL/scripts/captions.py" reels/<slug>` prints `DUR`, `SCN` and `CAPS`. Paste them into `reel.js`. Hand-tune an anchor (`word@12.3`) if a word lands early or late.
+6. **Captions + timing:** `python "SKILL/scripts/captions.py" reels/<slug> --write` times every caption word to the real voice and writes `dur`, `scn` and `caps` into `REEL` in reel.js. Scenes and beats point at those times (`'s2'`, `'g5'`, `'g5.1'`), so after a new voice take you only run this again. Hand-tune an anchor (`word@12.3`) if a word lands early or late.
 7. **Real assets:** screenshots with `node "SKILL/scripts/docshot.mjs" <url> reels/<slug>/as/<name>.png [--selector "css"]`, logos as SVG from the vendor or `SKILL/assets/logos`. Every asset gets a small source line on screen. Details: `references/ASSETS.md`.
-8. **Build `reel.js`.** Read `examples/claude-code-shortcuts/reel.js` first: it is the gold reel and shows every pattern. Pieces you can use: `references/COMPONENTS.md`. Pictures live in y 260 to 1100, captions own y 1150 to 1570.
+8. **Build `reel.js` with the scene kit.** Read `references/KIT.md`, then `examples/claude-code-shortcuts/reel.js` (the gold reel as a kit spec). Describe every scene as data: a `hook`, one `item` per point with 2 or 3 beats (one per caption group, each starting on the word it shows), a `cta`. Don't hand-code motion the kit already has; use `REEL.custom(t)` only for a picture no beat covers (patterns: `examples/claude-code-shortcuts/reel.hand.js`, `references/COMPONENTS.md`).
 9. **Judge:** `node "SKILL/engine/shot.cjs" reels/<slug> audit` must print `LAYOUT PASS`. Then `node "SKILL/engine/shot.cjs" reels/<slug> prev 0 <one time inside every scene>` and LOOK at every still (open the JPGs). Fix and repeat. Check the 5 hook stills at 0, 0.5, 1, 2, 3 s against `references/SCRIPT.md` (hook rules).
-10. **Sound:** edit `mix.py` (DUR, SCN, one sound per picture change; `references/SOUND.md`), run `python reels/<slug>/mix.py`. A different bed: `python "SKILL/scripts/music.py" search "lofi chill"` then `pull <id> reels/<slug>` (CC0 only).
+10. **Sound:** `python reels/<slug>/mix.py`. It reads every beat of reel.js (through `shot.cjs cues`) and gives each picture change the gold reel's sound, so there are no sound timings to write. Extra sounds go in `EXTRA` in mix.py (`references/SOUND.md`). A different bed: `python "SKILL/scripts/music.py" search "lofi chill"` then `pull <id> reels/<slug>` (CC0 only).
 11. **Render:** `node "SKILL/engine/render.cjs" reels/<slug>` then `python "SKILL/scripts/finish.py" reels/<slug>` (must print PASS) and `node "SKILL/engine/shot.cjs" reels/<slug> cover 0.6`.
 12. **Hand over** `reels/<slug>/out/final.mp4` and `out/cover.jpg`, plus a caption with the topic keywords in line 1, 3 to 5 hashtags, and the sources from facts.md.
 

@@ -1,5 +1,6 @@
 """Time the captions to the real voice, no transcript service needed.
-Usage: python captions.py <reel folder>
+Usage: python captions.py <reel folder> [--write]
+  --write (scene-kit reels): puts dur, scn and caps straight into REEL in reel.js. Without it, prints them to paste.
 Reads <reel>/script.txt and <reel>/audio/segs.json (from tighten.py). Prints a CAPS array and a SCN list to paste into reel.js.
 
 script.txt, one caption line per row:   size:display text|spoken words
@@ -13,6 +14,8 @@ Example:
   /m:almost *nobody uses.|almost nobody uses.
 Sentences are matched to the voice's real pauses (dynamic programming); rows share their sentence's speech by length."""
 import sys, os, json, re, functools
+try: sys.stdout.reconfigure(encoding='utf-8', errors='replace')  # Windows consoles default to cp1252
+except Exception: pass
 def weight(s):
     s = re.sub(r'[^A-Za-z0-9 \-]', '', s); return sum(len(w) + 1.5 for w in s.split()) + (2.5 if s else 0)
 def parse(src):
@@ -56,18 +59,65 @@ def align(sents, segs):
     for i in range(len(groups) - 1): groups[i]['t1'] = groups[i + 1]['t0']
     groups[-1]['t1'] = segs[-1][1] + 0.4
     return groups
+
+def block_end(src, i):
+    """i points at '[': return the index just after its matching ']' (skips strings)."""
+    depth = 0; q = None; k = i
+    while k < len(src):
+        c = src[k]
+        if q:
+            if c == '\\': k += 2; continue
+            if c == q: q = None
+        elif c in '\'"`': q = c
+        elif c == '[': depth += 1
+        elif c == ']':
+            depth -= 1
+            if depth == 0: return k + 1
+        k += 1
+    raise SystemExit('captions.py --write: could not find the end of a [ ] block in reel.js')
+def write_kit(rj, dur, scn, caps_js):
+    src = open(rj, encoding='utf-8').read()
+    src, n = re.subn(r'\bdur\s*:\s*[\d.]+', f'dur:{dur:.1f}', src, count=1)
+    if not n: raise SystemExit('captions.py --write: no "dur:" in REEL')
+    new_scn = 'scn:[' + ','.join(scn) + ']'
+    m = re.search(r'\bscn\s*:\s*\[', src)
+    if m: src = src[:m.start()] + new_scn + src[block_end(src, m.end() - 1):]
+    else:
+        m = re.search(r'\bdur\s*:\s*[\d.]+\s*,?', src); src = src[:m.end()] + ' ' + new_scn + ',' + src[m.end():]
+    m = re.search(r'\bcaps\s*:\s*\[', src)
+    if not m: raise SystemExit('captions.py --write: no "caps:[" in REEL')
+    src = src[:m.start()] + 'caps:[\n' + ',\n'.join(caps_js) + ']' + src[block_end(src, m.end() - 1):]
+    open(rj, 'w', encoding='utf-8').write(src)
 def js(s): return "'" + s.replace('\\', '\\\\').replace("'", "\\'") + "'"
 if __name__ == '__main__':
-    reel = os.path.abspath(sys.argv[1] if len(sys.argv) > 1 else '.')
+    args = [a for a in sys.argv[1:] if not a.startswith('--')]; reel = os.path.abspath(args[0] if args else '.')
     sents = parse(open(os.path.join(reel, 'script.txt'), encoding='utf-8').read()); segs = json.load(open(os.path.join(reel, 'audio', 'segs.json')))
     g = align(sents, segs); dur = segs[-1][1] + 0.5
-    print(f'const DUR={dur:.1f};')
-    print('const SCN=[' + ','.join(f'{x["t0"]:.2f}' if i else '0' for i, x in enumerate([x for x in g if x['scene']])) + '];')
-    print('const CAPS=[')
+    rj = os.path.join(reel, 'reel.js'); kit = os.path.exists(rj) and 'const REEL' in open(rj, encoding='utf-8').read()
+    scn = [f'{x["t0"]:.2f}' if i else '0' for i, x in enumerate([x for x in g if x['scene']])]
+    rows_js = []
     for x in g:
         rows = []
         for n, r in enumerate(x['rows']):
             text = r['d'] if n == 0 else f"{r['d']}@{r['t']:.2f}"
             rows.append(f"[{js(r['size'])},{js(text)}]")
-        print(f"[{x['t0']:.2f},{x['t1']:.2f},[{','.join(rows)}]],")
-    print('];')
+        rows_js.append(f"[{x['t0']:.2f},{x['t1']:.2f},[{','.join(rows)}]]")
+    if kit and '--write' in sys.argv:
+        write_kit(rj, dur, scn, rows_js)
+        print(f'WROTE reel.js: dur {dur:.1f}, scn {len(scn)} scene starts, caps {len(rows_js)} groups')
+        print('scene starts: ' + ', '.join(scn)); print('group starts: ' + ', '.join(f'{i}:{x["t0"]:.2f}' for i, x in enumerate(g)))
+    elif kit:
+        print('// Scene kit: paste dur, scn and caps into REEL (or run with --write). Scene times can then be s0, s1..., beat times g5 or g5.1.')
+        print('// Start every beat on a caption group start (or on a word anchor like word@12.3), so the picture changes when the words do.')
+        print('// scene starts: ' + ', '.join(scn))
+        print('// group starts: ' + ', '.join(f'{i}:{x["t0"]:.2f}' for i, x in enumerate(g)))
+        print(f' dur:{dur:.1f}, scn:[' + ','.join(scn) + '],')
+        print(' caps:[')
+        print(',\n'.join(rows_js))
+        print(' ]')
+    else:
+        print(f'const DUR={dur:.1f};')
+        print('const SCN=[' + ','.join(scn) + '];')
+        print('const CAPS=[')
+        for r in rows_js: print(r + ',')
+        print('];')

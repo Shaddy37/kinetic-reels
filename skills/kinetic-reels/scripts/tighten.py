@@ -3,6 +3,8 @@ then --tempo speed. Writes audio/vo.wav (48 kHz) and audio/segs.json (speech seg
 Usage: python tighten.py <reel folder> [--gap 0.34] [--tempo 1.0]
 Defaults are the gold list-reel settings (normal speed, 0.34 s pauses). 0.18 / 1.06 is too rushed for lists."""
 import sys, os, json, subprocess, tempfile, warnings, numpy as np, scipy.io.wavfile as w
+try: sys.stdout.reconfigure(encoding='utf-8', errors='replace')  # Windows consoles default to cp1252
+except Exception: pass
 warnings.filterwarnings("ignore", category=w.WavFileWarning)
 a = sys.argv[1:]; reel = os.path.abspath(a[0] if a and not a[0].startswith('--') else '.')
 gap = float(a[a.index('--gap') + 1]) if '--gap' in a else 0.34; tempo = float(a[a.index('--tempo') + 1]) if '--tempo' in a else 1.0
@@ -33,4 +35,4 @@ for p, q in segs:
     if m and p - m[-1][1] < 0.12: m[-1] = (m[-1][0], q)
     else: m.append((p, q))
 json.dump(m, open(segf, 'w')); print(f'VOICE TIGHT {m[-1][1]:.2f} s, {len(m)} speech segments -> {out}')
-print(f'Set DUR in reel.js to about {m[-1][1] + 0.5:.1f}')
+print(f'Next: captions.py --write (sets dur). Voice + 0.5 s = {m[-1][1] + 0.5:.1f}')

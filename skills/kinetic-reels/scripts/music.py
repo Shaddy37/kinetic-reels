@@ -3,6 +3,8 @@
   python music.py pull <openverse id> <reel folder> -> <reel>/audio/bed.mp3 + <reel>/audio/MUSIC-LICENSE.txt
 No search needed for a first reel: new-reel.mjs already copies the bundled CC0 track (assets/music) into every reel."""
 import sys, os, json, urllib.request, urllib.parse
+try: sys.stdout.reconfigure(encoding='utf-8', errors='replace')  # Windows consoles default to cp1252
+except Exception: pass
 UA = {'User-Agent': 'kinetic-reels/1.0 (open source skill)'}
 def get(url): return json.load(urllib.request.urlopen(urllib.request.Request(url, headers=UA), timeout=60))
 cmd = sys.argv[1] if len(sys.argv) > 1 else ''

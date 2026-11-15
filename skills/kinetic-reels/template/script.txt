@@ -1,9 +1,21 @@
 // Captions, one row per caption line:  size:display text|spoken words      (sizes: s m b p)
 // /  = new caption group (a new sentence).   #  = new scene too.   *word = gradient (one per group).   ~word = serif punch word
 // The spoken part must match tts.json word for word, in the same order. Then: python captions.py <this folder>
-#/s:TODO the hook,|TODO the hook,
+#/s:TODO the hook,|To do: the hook,
 b:*payoff first.|payoff first.
-#/m:TODO one idea|TODO one idea
+/s:TODO and number three|And number three
+p:opens a loop.|opens a loop.
+#/s:One.|One.
+b:*TODO one.|To do one.
+/m:TODO show it|Show it
+s:while you say it.|while you say it.
+#/s:Two.|Two.
+b:*TODO two.|To do two.
+/m:TODO one idea|One idea
 s:per caption group.|per caption group.
-#/s:TODO a CTA written|TODO a CTA written
-p:for THIS reel.|for this reel.
+#/s:And three.|And three.
+b:*TODO three.|To do three.
+/m:TODO pay off|Pay off
+s:the open loop.|the open loop.
+#/b:*Save this|Save this
+s:TODO a CTA for THIS reel.|before your next reel.

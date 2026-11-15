@@ -1,5 +1,7 @@
 # Sound
 
+Scene-kit reels: `mix.py` gets these sounds automatically from every beat (`shot.cjs <reel> cues` writes `audio/cues.json`). The table below is what the kit plays, so you know what to add in `EXTRA` or `REEL.sounds` for a custom scene. Turn a beat's sound off with `sound:false`.
+
 `mix.py` calls `mix_reel(vo, bed, events, DUR, out)`: the voice on top, the bed at RMS 0.022 ducked 50% under the voice, foley at 0.6, mastered to -16 LUFS (the norm for reels).
 
 Events: `(t, kind, gain)`, `(t, 'riser', gain, seconds)`, `(t, 'typing', gain, t_end)`.

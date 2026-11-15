@@ -15,7 +15,7 @@ fs.mkdirSync(path.join(dst, 'as', 'fonts'), { recursive: true }); fs.mkdirSync(p
 const cp = (f, t) => fs.copyFileSync(f, t);
 for (const f of fs.readdirSync(path.join(SKILL, 'template'))) cp(path.join(SKILL, 'template', f), path.join(dst, f));
 fs.writeFileSync(path.join(dst, 'mix.py'), fs.readFileSync(path.join(dst, 'mix.py'), 'utf8').replace('__SKILL_SCRIPTS__', JSON.stringify(path.join(SKILL, 'scripts'))));
-for (const f of ['core_a.js', 'core_b.js', 'motion.js', 'stars.js']) cp(path.join(SKILL, 'engine', f), path.join(dst, f));
+for (const f of ['core_a.js', 'motion.js', 'kit.js', 'core_b.js', 'stars.js']) cp(path.join(SKILL, 'engine', f), path.join(dst, f));
 for (const f of fs.readdirSync(path.join(SKILL, 'assets', 'fonts'))) cp(path.join(SKILL, 'assets', 'fonts', f), path.join(dst, 'as', 'fonts', f));
 for (const f of fs.readdirSync(path.join(SKILL, 'assets', 'logos'))) cp(path.join(SKILL, 'assets', 'logos', f), path.join(dst, 'as', f));
 cp(path.join(SKILL, 'assets', 'music', 'chill-beat-cc0.mp3'), path.join(dst, 'audio', 'bed.mp3'));

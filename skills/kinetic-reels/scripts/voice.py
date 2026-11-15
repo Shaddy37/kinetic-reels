@@ -6,6 +6,8 @@ Reads <reel>/tts.json:
 Each part is one turn with its own style (hook, body, payoff, CTA). Inline tags like <short pause> or <chuckle> are allowed
 (list in references/VOICE.md). Writes <reel>/audio/vo_raw.wav (24 kHz mono). Falls back through the models list."""
 import base64, json, os, sys, struct, urllib.request, urllib.error
+try: sys.stdout.reconfigure(encoding='utf-8', errors='replace')  # Windows consoles default to cp1252
+except Exception: pass
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__))); from _env import load_env
 def wav_from_pcm(pcm, sr=24000):
     return b'RIFF' + struct.pack('<I', 36 + len(pcm)) + b'WAVEfmt ' + struct.pack('<IHHIIHH', 16, 1, 1, sr, sr * 2, 2, 16) + b'data' + struct.pack('<I', len(pcm)) + pcm
