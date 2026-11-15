@@ -1,6 +1,6 @@
 # Last test run
 
-2026-11-15 11:01 UTC, commit `f94106d`, on clean GitHub machines.
+2026-11-15 15:33 UTC, commit `ee064d8`, on clean GitHub machines.
 
 Each machine installs the skill from scratch, runs the doctor, builds a new reel from the template with the scene kit (stand-in voice, captions --write, layout judge, automatic sound, render, final check) and renders the gold example reel.
 
@@ -10,6 +10,7 @@ Each machine installs the skill from scratch, runs the doctor, builds a new reel
 | macos-latest | **success** |
 | windows-latest | **success** |
 | real Gemini voice (ubuntu) | **skipped: add a GEMINI_API_KEY repository secret to run the real voice test** |
+| 20 s demo reel, no API key, free local voice (ubuntu) | **success** |
 
 <details><summary>ubuntu-latest log</summary>
 
@@ -82,13 +83,13 @@ group starts: 0:0.00, 1:1.54, 2:3.53, 3:5.97, 4:7.74, 5:9.96, 6:11.50, 7:13.49, 
 LAYOUT PASS
 CUES 54 sounds, 17.8 s
 MIX OK /Users/runner/work/kinetic-reels/kinetic-reels/ci-proj/reels/kit-test/audio/mix.wav
-RENDER OK /Users/runner/work/kinetic-reels/kinetic-reels/ci-proj/reels/kit-test/out/silent.mp4 (534 frames, 42 s)
+RENDER OK /Users/runner/work/kinetic-reels/kinetic-reels/ci-proj/reels/kit-test/out/silent.mp4 (534 frames, 40 s)
 PASS /Users/runner/work/kinetic-reels/kinetic-reels/ci-proj/reels/kit-test/out/final.mp4: 1080x1920, 30 fps, 17.8 s, -16.0 LUFS
 VOICE TIGHT 37.76 s, 37 speech segments -> /Users/runner/work/kinetic-reels/kinetic-reels/skills/kinetic-reels/examples/claude-code-shortcuts/audio/vo.wav
 Next: captions.py --write (sets dur). Voice + 0.5 s = 38.3
 LAYOUT PASS
 MIX OK /Users/runner/work/kinetic-reels/kinetic-reels/skills/kinetic-reels/examples/claude-code-shortcuts/audio/mix.wav
-RENDER OK /Users/runner/work/kinetic-reels/kinetic-reels/skills/kinetic-reels/examples/claude-code-shortcuts/out/silent.mp4 (1176 frames, 118 s)
+RENDER OK /Users/runner/work/kinetic-reels/kinetic-reels/skills/kinetic-reels/examples/claude-code-shortcuts/out/silent.mp4 (1176 frames, 80 s)
 PASS /Users/runner/work/kinetic-reels/kinetic-reels/skills/kinetic-reels/examples/claude-code-shortcuts/out/final.mp4: 1080x1920, 30 fps, 39.2 s, -16.0 LUFS
 ```
 </details>
@@ -123,13 +124,13 @@ group starts: 0:0.00, 1:1.54, 2:3.53, 3:5.97, 4:7.74, 5:9.96, 6:11.50, 7:13.49, 
 LAYOUT PASS
 CUES 54 sounds, 17.8 s
 MIX OK D:\a\kinetic-reels\kinetic-reels\ci-proj\reels\kit-test\audio\mix.wav
-RENDER OK D:\a\kinetic-reels\kinetic-reels\ci-proj\reels\kit-test\out\silent.mp4 (534 frames, 28 s)
+RENDER OK D:\a\kinetic-reels\kinetic-reels\ci-proj\reels\kit-test\out\silent.mp4 (534 frames, 21 s)
 PASS D:\a\kinetic-reels\kinetic-reels\ci-proj\reels\kit-test\out\final.mp4: 1080x1920, 30 fps, 17.8 s, -16.0 LUFS
 VOICE TIGHT 37.76 s, 37 speech segments -> D:\a\kinetic-reels\kinetic-reels\skills\kinetic-reels\examples\claude-code-shortcuts\audio\vo.wav
 Next: captions.py --write (sets dur). Voice + 0.5 s = 38.3
 LAYOUT PASS
 MIX OK D:\a\kinetic-reels\kinetic-reels\skills\kinetic-reels\examples\claude-code-shortcuts\audio\mix.wav
-RENDER OK D:\a\kinetic-reels\kinetic-reels\skills\kinetic-reels\examples\claude-code-shortcuts\out\silent.mp4 (1176 frames, 62 s)
+RENDER OK D:\a\kinetic-reels\kinetic-reels\skills\kinetic-reels\examples\claude-code-shortcuts\out\silent.mp4 (1176 frames, 46 s)
 PASS D:\a\kinetic-reels\kinetic-reels\skills\kinetic-reels\examples\claude-code-shortcuts\out\final.mp4: 1080x1920, 30 fps, 39.2 s, -16.0 LUFS
 ```
 </details>
@@ -140,3 +141,28 @@ PASS D:\a\kinetic-reels\kinetic-reels\skills\kinetic-reels\examples\claude-code-
 ```
 </details>
 
+<details><summary>demo log</summary>
+
+```
+NEW REEL /home/runner/work/kinetic-reels/kinetic-reels/ci-proj/reels/git-undo
+next: facts.md, script.txt + tts.json, then: python "/home/runner/work/kinetic-reels/kinetic-reels/skills/kinetic-reels/scripts/voice.py" "/home/runner/work/kinetic-reels/kinetic-reels/ci-proj/reels/git-undo"
+[0;93m2026-11-15 15:29:40.331031239 [W:onnxruntime:Default, device_discovery.cc:95 GetPciBusId] Skipping pci_bus_id for PCI path at "/sys/devices/LNXSYSTM:00/LNXSYBUS:00/ACPI0004:00/MSFT1000:00/5620e0c7-8062-4dce-aeb7-520c7ef76171" because filename "5620e0c7-8062-4dce-aeb7-520c7ef76171" did not match expected pattern of [0-9a-f]+:[0-9a-f]+:[0-9a-f]+[.][0-9a-f]+[m
+INSTALL piper-tts (free local voice, one time)
+DOWNLOAD en_US-ryan-high.onnx (one time)
+DOWNLOAD en_US-ryan-high.onnx.json (one time)
+VOICE OK local Piper en_US-ryan-high, 13 sentences, 22.5 s -> /home/runner/work/kinetic-reels/kinetic-reels/ci-proj/reels/git-undo/audio/vo_raw.wav
+VOICE TIGHT 18.95 s, 13 speech segments -> /home/runner/work/kinetic-reels/kinetic-reels/ci-proj/reels/git-undo/audio/vo.wav
+Next: captions.py --write (sets dur). Voice + 0.5 s = 19.4
+WROTE reel.js: dur 19.4, scn 5 scene starts, caps 10 groups
+scene starts: 0, 5.78, 9.48, 13.96, 17.43
+group starts: 0:0.00, 1:1.18, 2:3.72, 3:5.78, 4:7.32, 5:9.48, 6:11.29, 7:13.96, 8:15.57, 9:17.43
+LAYOUT PASS
+CUES 39 sounds, 19.4 s
+MIX OK /home/runner/work/kinetic-reels/kinetic-reels/ci-proj/reels/git-undo/audio/mix.wav
+RENDER OK /home/runner/work/kinetic-reels/kinetic-reels/ci-proj/reels/git-undo/out/silent.mp4 (582 frames, 37 s)
+PASS /home/runner/work/kinetic-reels/kinetic-reels/ci-proj/reels/git-undo/out/final.mp4: 1080x1920, 30 fps, 19.4 s, -16.1 LUFS
+COVER /home/runner/work/kinetic-reels/kinetic-reels/ci-proj/reels/git-undo/out/cover.jpg
+```
+</details>
+
+Demo reel made on this run with no API key: [docs/reels/git-undo-demo.mp4](reels/git-undo-demo.mp4)
